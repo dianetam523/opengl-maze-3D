@@ -1,4 +1,4 @@
-package renderEngine;
+package models;
 // Creates a RawModel 3D object using VAO (Vertex Attribute Object) data model
 // Vertex Buffer Objects (VBO) data stored in VAO attribute lists
 public class RawModel {

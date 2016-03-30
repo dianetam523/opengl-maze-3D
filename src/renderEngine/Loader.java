@@ -1,6 +1,9 @@
 package renderEngine;
 
 import java.awt.List;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -10,22 +13,44 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureLoader;
 
 import com.jogamp.opengl.GL;
+
+import models.RawModel;
 
 public class Loader {
 	// keep track of all the VAOs and VBOs that we've made
 	private ArrayList<Integer> vaos = new ArrayList<Integer>();
 	private ArrayList<Integer> vbos = new ArrayList<Integer>();
+	private ArrayList<Integer> textures = new ArrayList<Integer>();
 	
 	// Loader class reads in data and converts it to be stored as VAOs.
-	public RawModel loaderToVAO(float[] positions, int[] indices){
+	public RawModel loaderToVAO(float[] positions, float[] textureCoords, int[] indices){
 		int vaoID = createVAO();
 		bindIndicesBuffer(indices);
-		storeDataInAttributeList(0, positions);
+		// VBOs stored in the VAO
+		storeDataInAttributeList(0,3, positions);
+		storeDataInAttributeList(1,2, textureCoords);
+
 		unbindVAO();
 		return new RawModel(vaoID, indices.length);
 	}
+	
+	// load a texture from file
+	public int loadTexture(String fileName){
+		Texture texture = null;
+		try {
+			texture = TextureLoader.getTexture("PNG",new FileInputStream("res/"+fileName+".png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		int textureID = texture.getTextureID();
+		textures.add(textureID);
+		return textureID;
+	}
+	
 	// delete all VBOs and VAOs when game ends
 	public void cleanUp(){
 		for (int vao:vaos){
@@ -33,6 +58,9 @@ public class Loader {
 		}
 		for (int vbo:vbos){
 			GL30.glDeleteVertexArrays(vbo);
+		}
+		for (int texture:textures){
+			GL11.glDeleteTextures(texture);
 		}
 	}
 	
@@ -45,7 +73,7 @@ public class Loader {
 		return vaoID;
 	}
 	
-	private void storeDataInAttributeList(int attributeNumber, float[] data){
+	private void storeDataInAttributeList(int attributeNumber, int coordinateSize, float[] data){
 		// Bind a buffer before storing data to it
 		int vboID = GL15.glGenBuffers();
 		vbos.add(vboID);
@@ -54,7 +82,7 @@ public class Loader {
 		// GL_STATIC_DRAW says that we will not edit the data again once its in the VBO
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
 		// put the VBO into the VAO
-		GL20.glVertexAttribPointer(attributeNumber, 3, GL11.GL_FLOAT, false, 0, 0);
+		GL20.glVertexAttribPointer(attributeNumber, coordinateSize, GL11.GL_FLOAT, false, 0, 0);
 		// unbind current VBO
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	}
