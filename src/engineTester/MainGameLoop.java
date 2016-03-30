@@ -6,6 +6,7 @@ import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.RawModel;
 import renderEngine.Renderer;
+import shaders.StaticShader;
 
 public class MainGameLoop {
 
@@ -14,6 +15,7 @@ public class MainGameLoop {
 		
 		Loader loader = new Loader();
 		Renderer renderer = new Renderer();
+		StaticShader shader = new StaticShader();
 		
 		// vertex data to create a rectangle
 		float[] vertices = {
@@ -34,15 +36,17 @@ public class MainGameLoop {
 		// main game loop
 		while(!Display.isCloseRequested()){
 			renderer.prepare();
+			shader.start();
 			// game logic
 			// render
 			renderer.render(model);
+			shader.stop();
 			DisplayManager.updateDisplay();
 		}
 		// close display once game loop is done executing
 		
+		shader.cleanUp();
 		loader.cleanUp();
-		
 		DisplayManager.closeDisplay();
 	}
 
