@@ -27,12 +27,13 @@ public class Loader {
 	private ArrayList<Integer> textures = new ArrayList<Integer>();
 	
 	// Loader class reads in data and converts it to be stored as VAOs.
-	public RawModel loaderToVAO(float[] positions, float[] textureCoords, int[] indices){
+	public RawModel loaderToVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices){
 		int vaoID = createVAO();
 		bindIndicesBuffer(indices);
 		// VBOs stored in the VAO
 		storeDataInAttributeList(0,3, positions);
 		storeDataInAttributeList(1,2, textureCoords);
+		storeDataInAttributeList(2,3, normals);
 
 		unbindVAO();
 		return new RawModel(vaoID, indices.length);
