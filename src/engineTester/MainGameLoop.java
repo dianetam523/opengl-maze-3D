@@ -10,9 +10,11 @@ import models.RawModel;
 import models.TexturedModel;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
+import renderEngine.MasterRenderer;
 import renderEngine.OBJLoader;
-import renderEngine.Renderer;
+import renderEngine.EntityRenderer;
 import shaders.StaticShader;
+import terrains.Terrain;
 import textures.ModelTexture;
 
 public class MainGameLoop {
@@ -22,37 +24,40 @@ public class MainGameLoop {
 
 		Loader loader = new Loader();
 		StaticShader shader = new StaticShader();
-		Renderer renderer = new Renderer(shader);
-
 
 
 		// load vertices into model
 		RawModel model = OBJLoader.loadObjModel("dragon", loader);
 
 		// load ModelTexture
-		TexturedModel staticModel = new TexturedModel(model, new ModelTexture(loader.loadTexture("image")));
-
-		Entity entity = new Entity(staticModel, new Vector3f(0,0,-25), 0, 0, 0, 1);
+		TexturedModel staticModel = new TexturedModel(model, new ModelTexture(loader.loadTexture("white")));
+		Entity entity = new Entity(staticModel, new Vector3f(250,0,200), 0, 0, 0, 1);
 		Light light = new Light(new Vector3f(0,0,-20), new Vector3f(1, 1, 1));
 		
-		Camera camera = new Camera();
+		Terrain terrain = new Terrain(0, 0, loader, new ModelTexture(loader.loadTexture("grass")));
+		Terrain terrain2 = new Terrain(1, 0, loader, new ModelTexture(loader.loadTexture("grass")));
+
 		
+		
+		Camera camera = new Camera();
+
+		MasterRenderer renderer = new MasterRenderer();
+
 		// main game loop
 		while(!Display.isCloseRequested()){
 			entity.increaseRotation(0, 1, 0);
 			camera.move(); //takes in keyboard inputs, allows you to control camera
-			renderer.prepare();
-			shader.start();
-			shader.loadLight(light);
-			shader.loadViewMatrix(camera);
-
-			renderer.render(entity, shader);
-			shader.stop();
+			
+			renderer.processTerrain(terrain);
+			renderer.processTerrain(terrain2);
+			renderer.processEntity(entity);
+			
+			renderer.render(light, camera);
 			DisplayManager.updateDisplay();
 		}
+		
 		// close display once game loop is done executing
-
-		shader.cleanUp();
+		renderer.cleanUp();
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
 	}

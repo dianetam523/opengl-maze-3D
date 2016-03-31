@@ -89,7 +89,7 @@ public class OBJLoader {
 		for(int i = 0; i<indices.size(); i++){
 			indicesArray[i] = indices.get(i);
 		}
-		return loader.loaderToVAO(verticesArray, textureArray, normalsArray, indicesArray);
+		return loader.loadToVAO(verticesArray, textureArray, normalsArray, indicesArray);
 	}
 	
 	// sort vertex into correct position in corresponding arrays 
